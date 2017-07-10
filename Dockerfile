@@ -1,4 +1,4 @@
-FROM debian:8.6
+FROM debian:8.7
 
 MAINTAINER Jonathan Gordon <jgordon@isi.edu>
 
