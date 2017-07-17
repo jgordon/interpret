@@ -5,6 +5,7 @@ import sys
 import tempfile
 import re
 import subprocess as sub
+import ftfy
 
 from flask import Flask, request, jsonify, send_file
 
@@ -55,10 +56,18 @@ def run_commands(cmds, data):
 
 app = Flask(__name__)
 
+def process_text(text):
+    # Fix character encoding problems and uncurl quotes.
+    text = ftfy.fix_text(text)
+    # Remove dashes since we can't really handle them.
+    text = re.sub(' ?(--|–|—) ?', ' ', text)
+    return text.encode() + b'\n'
+
 
 @app.route('/parse', methods=['POST'])
 def parse():
-    data = request.get_json(force=True)['s'].encode() + b'\n'
+    data = process_text(request.get_json(force=True)['s'])
+
     out, err = run_commands(['tokenize', 'candc', 'boxer'], data)
     if err:
         return jsonify({'error': err})
@@ -67,7 +76,7 @@ def parse():
 
 @app.route('/interpret', methods=['POST'])
 def interpret():
-    data = request.get_json(force=True)['s'].encode() + b'\n'
+    data = process_text(request.get_json(force=True)['s'])
 
     out, err = run_commands(['tokenize', 'candc', 'boxer'], data)
     if err:
