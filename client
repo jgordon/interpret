@@ -1,15 +1,32 @@
 #!/usr/bin/env python3
 
 import sys
+import click
 import requests
 
 host = 'localhost'
 port = '5000'
 
-if __name__ == '__main__':
-    sentence = ' '.join(sys.argv[1:])
 
-    query = {'s': sentence}
+@click.command()
+@click.option('-s', type=click.Path(exists=True),
+              help='File containing a sentence.')
+@click.option('-p', type=click.Path(exists=True),
+              help='File containing a parsed sentence.')
+@click.argument('sent', nargs=-1, metavar='<sentence>')
+def main(s, p, sent):
+    """Interpret a sentence or a parsed sentence. Sentences can be read
+    from a file (-s) or passed as the argument <sentence>. Parses must be read
+    from a file (-p)."""
+
+    query = {}
+
+    if sent:
+        query = {'s': ' '.join(sent)}
+    elif s:
+        query = {'s': open(s).read()}
+    elif p:
+        query = {'p': open(p).read()}
 
     r = requests.post('http://' + host + ':' + port + '/interpret', json=query)
     if not r:
@@ -18,7 +35,7 @@ if __name__ == '__main__':
 
     response = r.json()
 
-    if 'parse' in response:
+    if 'parse' in response and not p:
         print('Parse:')
         print(response['parse'])
 
@@ -27,9 +44,14 @@ if __name__ == '__main__':
         print(response['interpret'])
 
     if 'graph' in response:
+        print()
         print('Proof graph URL:')
         print(response['graph'])
 
     if 'error' in response:
         print('Error:')
         print(response['error'])
+
+
+if __name__ == '__main__':
+    main()

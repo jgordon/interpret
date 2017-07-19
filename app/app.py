@@ -71,18 +71,26 @@ def parse():
     out, err = run_commands(['tokenize', 'candc', 'boxer'], data)
     if err:
         return jsonify({'error': err})
+
     return jsonify({'parse': process_boxer(out, nonmerge)})
 
 
 @app.route('/interpret', methods=['POST'])
 def interpret():
-    data = process_text(request.get_json(force=True)['s'])
+    data = request.get_json(force=True)
 
-    out, err = run_commands(['tokenize', 'candc', 'boxer'], data)
-    if err:
-        return jsonify({'error': err})
+    if 's' in data:
+        sent = process_text(data['s'])
 
-    parse = process_boxer(out, nonmerge)
+        out, err = run_commands(['tokenize', 'candc', 'boxer'], sent)
+        if err:
+            return jsonify({'error': err})
+
+        parse = process_boxer(out, nonmerge)
+    elif 'p' in data:
+        parse = data['p']
+    else:
+        return jsonify({'error': 'No sentence or parse found.'})
 
     data = parse.encode() + b'\n'
     out, err = run_commands(['phillip'], data)

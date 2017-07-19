@@ -138,10 +138,13 @@ def process_boxer(lines, nonmerge=None):
             if m.group(4):
                 prop_args = ' ' + m.group(4).replace(',', ' ')
 
-            # Write Henry representation of the proposition.
-            out += ' (' + prop_name + prop_args + ' :1:' + \
-                   sent_id + '-' + str(prop_id_counter) + ':[' + \
-                   word_id_str + '])'
+            # Write the representation of the proposition.
+            out += ' (' + prop_name + prop_args + ')'
+
+            # Previously we included these identifiers.
+            # + ' :1:' + \
+            # sent_id + '-' + str(prop_id_counter) + ':[' + \
+            # word_id_str + ']' +
 
             if not m.group(4):
                 # No arguments.
