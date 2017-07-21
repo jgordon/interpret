@@ -7,7 +7,7 @@ import re
 import subprocess as sub
 import ftfy
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template
 
 from process import process_phillip, process_boxer
 
@@ -100,7 +100,7 @@ def interpret():
 
     interpret = process_phillip(out)
 
-    path = graph_output(out)
+    path = visualize_output(out)
 
     if path == 'error':
         return jsonify({'parse': parse,
@@ -112,8 +112,8 @@ def interpret():
                     'graph': request.url_root + 'graph/' + path})
 
 
-def graph_output(lines):
-    with tempfile.NamedTemporaryFile(mode='w', prefix='') as temp:
+def visualize_output(lines):
+    with tempfile.NamedTemporaryFile(mode='w', prefix='', delete=False) as temp:
         temp.writelines(lines)
         temp.flush()
 
@@ -131,7 +131,13 @@ def graph_output(lines):
 
 @app.route('/graph/<graphname>', methods=['GET'])
 def graph(graphname):
-    return send_file(tempfile.gettempdir() + '/' + graphname + '.pdf')
+    logfile = open(tempfile.gettempdir() + '/' + graphname).read()
+    return render_template('graph.html', graphname=graphname, logfile=logfile)
+
+
+@app.route('/tmp/<fname>', methods=['GET'])
+def tmp(fname):
+    return send_file(tempfile.gettempdir() + '/' + fname)
 
 
 if __name__ == '__main__':
