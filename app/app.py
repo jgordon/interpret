@@ -21,6 +21,11 @@ from process import process_phillip, process_boxer
 nonmerge = set(['sameid', 'freqpred'])
 
 commands = {
+    'compile kb':
+      ['/interpret/ext/phillip/bin/phil',
+       '-m', 'compile',
+       '-k' '/interpret/kb/compiled',
+       '-'],
     'tokenize':
       ['/interpret/ext/candc/bin/t',
        '--stdin'],
@@ -78,6 +83,16 @@ def parse():
 @app.route('/interpret', methods=['POST'])
 def interpret():
     data = request.get_json(force=True)
+
+    # For simplicity of code, we recompile the KB regardless of whether
+    # one is passed as input.
+    if 'kb' in data:
+        kb = data['kb'].encode()
+    else:
+        kb = open('/interpret/kb/kb.lisp').read().encode()
+    out, err = run_commands(['compile kb'], kb)
+    if err:
+        return jsonify({'error': err})
 
     if 's' in data:
         sent = process_text(data['s'])

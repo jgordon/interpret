@@ -10,11 +10,12 @@ pushd ext/candc
 
 popd
 
-# Start Phillip ILP solver for inference.
+# Compile KB for Phillip ILP solver for inference.
+# This is now done per-request in 'app.py'.
 
-pushd ext/phillip
-./bin/phil -m compile -k /interpret/kb/compiled /interpret/kb/kb.lisp
-popd
+# pushd ext/phillip
+# ./bin/phil -m compile -k /interpret/kb/compiled /interpret/kb/kb.lisp
+# popd
 
 # Start web service.
 

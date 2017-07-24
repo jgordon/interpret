@@ -13,20 +13,25 @@ port = '5000'
               help='File containing a sentence.')
 @click.option('-p', type=click.Path(exists=True),
               help='File containing a parsed sentence.')
+@click.option('-k', type=click.Path(exists=True),
+              help='File containing a knowledge base.')
 @click.argument('sent', nargs=-1, metavar='<sentence>')
-def main(s, p, sent):
+def main(s, p, k, sent):
     """Interpret a sentence or a parsed sentence. Sentences can be read
     from a file (-s) or passed as the argument <sentence>. Parses must be read
     from a file (-p)."""
 
     query = {}
 
+    if k:
+        query['kb'] = open(k).read()
+
     if sent:
-        query = {'s': ' '.join(sent)}
+        query['s'] = ' '.join(sent)
     elif s:
-        query = {'s': open(s).read()}
+        query['s'] = open(s).read()
     elif p:
-        query = {'p': open(p).read()}
+        query['p'] = open(p).read()
 
     r = requests.post('http://' + host + ':' + port + '/interpret', json=query)
     if not r:
