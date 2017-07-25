@@ -1,5 +1,9 @@
 # interpret
-Interpret English into Hobbsian logical forms
+
+Interpret English into Hobbsian logical forms.
+
+Dependencies for the server are handled by Docker. The client depends on
+the 'click' package: `conda install click` or `pip3 install click`.
 
 Build and run the image:
 ```
