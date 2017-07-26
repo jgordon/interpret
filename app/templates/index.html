@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html lang=" en">
+
+<head>
+<meta charset="utf-8">
+<title>Interpret</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400">
+<link rel="stylesheet" type="text/css" media="all" href="/static/style.css">
+</head>
+
+<body>
+
+<h1>Interpret</h1>
+
+<form method="post" action="/interpret/html">
+
+<section>
+<h2>Observations</h2>
+
+<div class="switch-field">
+<input type="radio" id="switch_left" name="input_type" value="sent" checked>
+<label for="switch_left">Sentences</label>
+<input type="radio" id="switch_right" name="input_type" value="lf">
+<label for="switch_right">Logical forms</label>
+</div>
+
+<div>
+<textarea name="sent_or_lf" rows="20" cols="80"></textarea>
+</div>
+</section>
+
+<section>
+<h2>Knowledge base</h2>
+<textarea name="kb" rows="20" cols="80"></textarea>
+</section>
+
+<section>
+<input type="submit" value="Interpret">
+</section>
+</form>
+
+</body>
+
+</html>

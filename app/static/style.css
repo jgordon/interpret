@@ -1,0 +1,104 @@
+body {
+    background: #efefef;
+    color: #4a4a4a;
+    font: 14pt/16pt 'Lato', 'Helvetica', sans-serif;
+    font-weight: 400;
+    width: 80%;
+    margin: 5em auto;
+}
+
+h1 {
+    text-transform: uppercase;
+    font-size: 14pt;
+    line-height: 26px;
+    font-weight: 400;
+}
+
+h2 {
+    font-size: 14pt;
+    line-height: 18pt;
+    font-weight: 400;
+}
+
+section {
+    margin: 3em 0;
+}
+
+textarea {
+    background: #fff;
+}
+
+textarea, pre {
+    font-size: 10pt;
+    font-family: Menlo, Monaco, Andale Mono, monospace;
+    white-space: pre-wrap;
+}
+
+iframe {
+    border: 0px;
+    height: 40%;
+    width: 90%;
+    min-height: 400px;
+    min-width: 200px;
+    max-height: 500px;
+    max-width: 700px;
+}
+
+.switch-field {
+    overflow: hidden;
+    padding: 2px;
+}
+
+.switch-field input {
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    width: 1px;
+    border: 0;
+    overflow: hidden;
+}
+
+.switch-field label {
+    float: left;
+}
+
+.switch-field label {
+    display: inline-block;
+    width: 100px;
+    background-color: #e4e4e4;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+    font-weight: normal;
+    text-align: center;
+    text-shadow: none;
+    padding: 6px 14px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3),
+        0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3),
+        0 1px rgba(255, 255, 255, 0.1);
+    -webkit-transition: all 0.1s ease-in-out;
+    -moz-transition: all 0.1s ease-in-out;
+    -ms-transition: all 0.1s ease-in-out;
+    -o-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+}
+
+.switch-field label:hover {
+    cursor: pointer;
+}
+
+.switch-field input:checked + label {
+    color: #fff;
+    background-color: #4183c4;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.switch-field label:first-of-type {
+    border-radius: 4px 0 0 4px;
+}
+
+.switch-field label:last-of-type {
+    border-radius: 0 4px 4px 0;
+}

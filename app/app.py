@@ -5,9 +5,11 @@ import sys
 import tempfile
 import re
 import subprocess as sub
+import json
 import ftfy
 
-from flask import Flask, request, jsonify, send_file, render_template
+from flask import Flask, request, jsonify, send_file, send_from_directory, \
+    render_template
 
 from process import process_phillip, process_boxer
 
@@ -59,8 +61,6 @@ def run_commands(cmds, data):
     return data.decode(), None
 
 
-app = Flask(__name__)
-
 def process_text(text):
     # Fix character encoding problems and uncurl quotes.
     text = ftfy.fix_text(text)
@@ -69,8 +69,16 @@ def process_text(text):
     return text.encode() + b'\n'
 
 
+app = Flask(__name__)
+
+
+@app.route('/')
+def index_html():
+    return render_template('index.html')
+
+
 @app.route('/parse', methods=['POST'])
-def parse():
+def parse_api():
     data = process_text(request.get_json(force=True)['s'])
 
     out, err = run_commands(['tokenize', 'candc', 'boxer'], data)
@@ -80,10 +88,27 @@ def parse():
     return jsonify({'parse': process_boxer(out, nonmerge)})
 
 
-@app.route('/interpret', methods=['POST'])
-def interpret():
-    data = request.get_json(force=True)
+@app.route('/interpret/html', methods=['POST'])
+def interpret_html():
+    j = {'kb': request.form['kb']}
 
+    input_type = request.form['input_type']
+    input = request.form['sent_or_lf']
+
+    if input_type == 'sent':
+        j['s'] = input
+    elif input_type == 'lf':
+        j['p'] = input
+
+    return graph_html(re.sub('^.+\/', '', interpret(j)['graph']))
+
+
+@app.route('/interpret', methods=['POST'])
+def interpret_api():
+    return jsonify(interpret(request.get_json(force=True)))
+
+
+def interpret(data):
     # For simplicity of code, we recompile the KB regardless of whether
     # one is passed as input.
     if 'kb' in data:
@@ -122,9 +147,15 @@ def interpret():
                         'interpret': interpret,
                         'error': 'Failed to generate proof graph.'})
 
-    return jsonify({'parse': parse,
-                    'interpret': interpret,
-                    'graph': request.url_root + 'graph/' + path})
+    j = {'parse': parse,
+         'interpret': interpret,
+         'graph': request.url_root + 'graph/' + path}
+
+
+    with open(tempfile.gettempdir() + '/' + path + '.json', 'w') as jout:
+        json.dump(j, jout)
+
+    return j
 
 
 def visualize_output(lines):
@@ -145,14 +176,17 @@ def visualize_output(lines):
 
 
 @app.route('/graph/<graphname>', methods=['GET'])
-def graph(graphname):
+def graph_html(graphname):
     logfile = open(tempfile.gettempdir() + '/' + graphname).read()
-    return render_template('graph.html', graphname=graphname, logfile=logfile)
+    j = json.load(open(tempfile.gettempdir() + '/' + graphname + '.json'))
+    return render_template('graph.html', lf=j['parse'],
+                           interpretation=j['interpret'],
+                           graphname=graphname, logfile=logfile)
 
 
 @app.route('/tmp/<fname>', methods=['GET'])
 def tmp(fname):
-    return send_file(tempfile.gettempdir() + '/' + fname)
+    return send_from_directory(tempfile.gettempdir(), fname)
 
 
 if __name__ == '__main__':

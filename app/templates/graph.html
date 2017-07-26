@@ -1,18 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 
-<html>
+<html lang="en">
 
 <head>
+<meta charset="utf-8">
 <title>Interpretation Graph</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400">
+<link rel="stylesheet" type="text/css" media="all" href="/static/style.css">
 </head>
 
-<body style="text-align: center">
-  <iframe src="/tmp/{{graphname}}.pdf" border="0"
-          style="min-width: 50%; min-height: 60%"></iframe>
+<body>
 
-  <pre style="text-align: left; font-family: Menlo, Monaco, Andale Mono, monospace">
+<h1>Interpret</h1>
+
+<section>
+<h2>Logical form</h2>
+<pre>
+{{lf}}
+</pre>
+</section>
+
+<section>
+<h2>Interpretation</h2>
+<pre>
+{{interpretation}}
+</pre>
+</section>
+
+<section>
+<h2>Proof graph</h2>
+<iframe src="/tmp/{{graphname}}.pdf">
+</iframe>
+<p><a href="/tmp/{{graphname}}.pdf">PDF</a></p>
+</section>
+
+<section>
+<h2>Reasoner output</h2>
+<pre>
 {{logfile}}
-  </pre>
+</pre>
+</section>
+
 </body>
 
 </html>
