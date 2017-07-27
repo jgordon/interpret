@@ -166,8 +166,8 @@ def visualize_output(lines):
         try:
             sub.run(['python', '/interpret/ext/phillip/tools/graphviz.py',
                      temp.name])
-            sub.run(['dot', '-Tpdf', temp.name + '.dot',
-                     '-o', temp.name + '.pdf'])
+            sub.run(['dot', '-Tsvg', temp.name + '.dot',
+                     '-o', temp.name + '.svg'])
             os.remove(temp.name + '.dot')
             return re.sub('.+/', '', temp.name)
         except Exception as e:
