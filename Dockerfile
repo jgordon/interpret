@@ -55,6 +55,28 @@ RUN cd candc && \
     tar -xjvf models-1.02.tbz2
 
 
+# Install Gurobi.
+
+ENV GUROBI_INSTALL /interpret/ext/gurobi
+ENV GUROBI_HOME $GUROBI_INSTALL/linux64
+ENV PATH $PATH:$GUROBI_HOME/bin
+ENV CPLUS_INCLUDE_PATH $GUROBI_HOME/include:$CPLUS_INCLUDE_PATH
+ENV LD_LIBRARY_PATH $GUROBI_HOME/lib:$LD_LIBRARY_PATH
+ENV GRB_LICENSE_FILE /interpret/ext/gurobi/license/gurobi.lic
+
+RUN mkdir -p $GUROBI_INSTALL && \
+    wget http://packages.gurobi.com/6.0/gurobi6.0.5_linux64.tar.gz && \
+    tar xvzf gurobi6.0.5_linux64.tar.gz && \
+    mv gurobi605/linux64 $GUROBI_INSTALL && \
+    mkdir $GUROBI_HOME/scripts && \
+    # Clean up.
+    rm -rf $GUROBI_HOME/docs && \
+    rm -rf $GUROBI_HOME/examples && \
+    rm -rf $GUROBI_HOME/src && \
+    rm -rf gurobi605 && \
+    rm -f gurobi6.0.5_linux64.tar.gz
+
+
 # Install Phillip.
 
 RUN apt-get install -q -y --fix-missing --no-install-recommends \
@@ -62,12 +84,13 @@ RUN apt-get install -q -y --fix-missing --no-install-recommends \
 
 ENV CPLUS_INCLUDE_PATH /usr/include/lpsolve:$CPLUS_INCLUDE_PATH
 ENV LD_LIBRARY_PATH /usr/lib/lp_solve:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH /usr/lib/lp_solve:$GUROBI_HOME/lib:$LIBRARY_PATH
 
 RUN git clone https://github.com/kazeto/phillip.git && \
     cd phillip && \
     2to3 -w tools/configure.py && \
-    /bin/echo -e "\ny\nn" | python ./tools/configure.py && \
-    make LDFLAGS="-lcolamd -llpsolve55 -ldl"
+    /bin/echo -e "\ny\ny" | python ./tools/configure.py && \
+    make LDFLAGS="-lcolamd -llpsolve55 -lgurobi_c++ -lgurobi60 -ldl"
 
 RUN 2to3 -w phillip/tools/util.py && \
     2to3 -w phillip/tools/graphviz.py

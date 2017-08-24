@@ -9,6 +9,7 @@ port = '5000'
 
 
 @click.command()
+@click.option('-l', help='Gurobi license key.')
 @click.option('-s', type=click.Path(exists=True),
               help='File containing a sentence.')
 @click.option('-p', type=click.Path(exists=True),
@@ -16,10 +17,23 @@ port = '5000'
 @click.option('-k', type=click.Path(exists=True),
               help='File containing a knowledge base.')
 @click.argument('sent', nargs=-1, metavar='<sentence>')
-def main(s, p, k, sent):
+def main(l, s, p, k, sent):
     """Interpret a sentence or a parsed sentence. Sentences can be read
     from a file (-s) or passed as the argument <sentence>. Parses must be read
     from a file (-p)."""
+
+    if l:
+        query = {'license': l}
+        r = requests.post('http://' + host + ':' + port + '/license',
+                          json=query)
+        if not r:
+            sys.stderr.write('Error receiving response from server.\n')
+            sys.exit(1)
+
+        print(r.json()['response'])
+
+    if not s and not p and not k and not sent:
+        sys.exit()
 
     query = {}
 
@@ -32,6 +46,8 @@ def main(s, p, k, sent):
         query['s'] = open(s).read()
     elif p:
         query['p'] = open(p).read()
+
+
 
     r = requests.post('http://' + host + ':' + port + '/interpret', json=query)
     if not r:

@@ -26,6 +26,8 @@ commands = {
     'compile kb':
       ['/interpret/ext/phillip/bin/phil',
        '-m', 'compile',
+       '-c', 'dist=cost',
+       '-c', 'tab=null',
        '-k' '/interpret/kb/compiled',
        '-'],
     'tokenize':
@@ -40,14 +42,24 @@ commands = {
        '--semantics', 'tacitus',
        '--resolve', 'true',
        '--roles', 'verbnet'],
-    'phillip':
+    'phillip-lpsolve':
       ['/interpret/ext/phillip/bin/phil',
        '-m', 'infer',
        '-k', '/interpret/kb/compiled',
        '-H',
        '-c', 'lhs=depth',
        '-c', 'ilp=weighted',
-       '-c', 'sol=lpsolve']}
+       '-c', 'sol=lpsolve'],
+    'phillip-gurobi-kbest':
+      ['/interpret/ext/phillip/bin/phil',
+       '-m', 'infer',
+       '-k', '/interpret/kb/compiled',
+       '-H',
+       '-c', 'lhs=depth',
+       '-c', 'ilp=weighted',
+       '-c', 'sol=gurobi-kbest',
+       '-p', 'max-sols-num=3'
+      ]}
 
 
 def run_commands(cmds, data):
@@ -56,9 +68,10 @@ def run_commands(cmds, data):
             p = sub.run(commands[cmd], input=data, stdout=sub.PIPE,
                         stderr=sub.PIPE)
             data = p.stdout
+            err = p.stderr
         except Exception as e:
             return None, 'Exception communicating with ' + cmd + '\n' + str(e)
-    return data.decode(), None
+    return data.decode(), err.decode()
 
 
 def process_text(text):
@@ -82,8 +95,8 @@ def parse_api():
     data = process_text(request.get_json(force=True)['s'])
 
     out, err = run_commands(['tokenize', 'candc', 'boxer'], data)
-    if err:
-        return jsonify({'error': err})
+    #if err:
+    #    return jsonify({'error': err})
 
     return jsonify({'parse': process_boxer(out, nonmerge)})
 
@@ -100,7 +113,15 @@ def interpret_html():
     elif input_type == 'lf':
         j['p'] = input
 
-    return graph_html(re.sub('^.+\/', '', interpret(j)['graph']))
+    try:
+        interp = interpret(j)
+        graph_id = re.sub('^.+\/', '', interp['graph'])
+    except KeyError:
+        print('Bad interpretation:', file=sys.stderr)
+        print(interp, file=sys.stderr)
+        return
+
+    return graph_html(graph_id)
 
 
 @app.route('/interpret', methods=['POST'])
@@ -115,37 +136,40 @@ def interpret(data):
         kb = data['kb'].encode()
     else:
         kb = open('/interpret/kb/kb.lisp').read().encode()
+
     out, err = run_commands(['compile kb'], kb)
-    if err:
-        return jsonify({'error': err})
 
     if 's' in data:
         sent = process_text(data['s'])
 
         out, err = run_commands(['tokenize', 'candc', 'boxer'], sent)
-        if err:
-            return jsonify({'error': err})
+        #if err:
+        #    return {'error': err}
 
         parse = process_boxer(out, nonmerge)
     elif 'p' in data:
         parse = data['p']
     else:
-        return jsonify({'error': 'No sentence or parse found.'})
+        return {'error': 'No sentence or parse found.'}
+
+    cmd = 'phillip-lpsolve'
+    if os.path.isfile('/interpret/ext/gurobi/license/gurobi.lic'):
+        cmd = 'phillip-gurobi-kbest'
 
     data = parse.encode() + b'\n'
-    out, err = run_commands(['phillip'], data)
-    if err:
-        return jsonify({'parse': parse,
-                        'error': err})
+    out, err = run_commands([cmd], data)
+    #if err:
+    #    # Phillip prints trivial messages to stderr.
+    #    sys.stderr.write('Running inference:\n%s\n' % err)
 
     interpret = process_phillip(out)
 
     path = visualize_output(out)
 
     if path == 'error':
-        return jsonify({'parse': parse,
-                        'interpret': interpret,
-                        'error': 'Failed to generate proof graph.'})
+        return {'parse': parse,
+                'interpret': interpret,
+                'error': 'Failed to generate proof graph.'}
 
     j = {'parse': parse,
          'interpret': interpret,
@@ -178,15 +202,37 @@ def visualize_output(lines):
 @app.route('/graph/<graphname>', methods=['GET'])
 def graph_html(graphname):
     logfile = open(tempfile.gettempdir() + '/' + graphname).read()
-    j = json.load(open(tempfile.gettempdir() + '/' + graphname + '.json'))
-    return render_template('graph.html', lf=j['parse'],
-                           interpretation=j['interpret'],
+
+    try:
+        j = json.load(open(tempfile.gettempdir() + '/' + graphname + '.json'))
+        parse = j['parse']
+        interpret = j['interpret']
+    except Exception as e:
+        sys.stderr.write(str(e))
+        return 'error'
+
+    return render_template('graph.html', lf=parse, interpretation=interpret,
                            graphname=graphname, logfile=logfile)
 
 
 @app.route('/tmp/<fname>', methods=['GET'])
 def tmp(fname):
     return send_from_directory(tempfile.gettempdir(), fname)
+
+
+@app.route('/license', methods=['POST'])
+def license():
+    key = request.get_json(force=True)['license']
+
+    try:
+        os.remove('/interpret/ext/gurobi/license/gurobi.lic')
+    except:
+        pass
+
+    p = sub.run(["echo '\n/interpret/ext/gurobi/license' | grbgetkey " + key],
+                shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
+
+    return jsonify({'response': p.stdout.decode()})
 
 
 if __name__ == '__main__':
