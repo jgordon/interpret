@@ -28,8 +28,7 @@ commands = {
        '-m', 'compile',
        '-c', 'dist=cost',
        '-c', 'tab=null',
-       '-k' '/interpret/kb/compiled',
-       '-'],
+       '-k' '/interpret/kb/compiled'],
     'tokenize':
       ['/interpret/ext/candc/bin/t',
        '--stdin'],
@@ -119,7 +118,7 @@ def interpret_html():
     except KeyError:
         print('Bad interpretation:', file=sys.stderr)
         print(interp, file=sys.stderr)
-        return
+        return 'error'
 
     return graph_html(graph_id)
 
@@ -132,7 +131,7 @@ def interpret_api():
 def interpret(data):
     # For simplicity of code, we recompile the KB regardless of whether
     # one is passed as input.
-    if 'kb' in data:
+    if 'kb' in data and '(' in data['kb']:
         kb = data['kb'].encode()
     else:
         kb = open('/interpret/kb/kb.lisp').read().encode()
@@ -209,7 +208,6 @@ def graph_html(graphname):
         interpret = j['interpret']
     except Exception as e:
         sys.stderr.write(str(e))
-        return 'error'
 
     return render_template('graph.html', lf=parse, interpretation=interpret,
                            graphname=graphname, logfile=logfile)
