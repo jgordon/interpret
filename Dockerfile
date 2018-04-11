@@ -1,4 +1,4 @@
-FROM debian:8.7
+FROM debian:8.10
 
 MAINTAINER Jonathan Gordon <jgordon@isi.edu>
 
@@ -34,18 +34,11 @@ RUN conda install -y flask beautifulsoup4 lxml ftfy
 # Add the C&C pipeline and compile.
 
 RUN apt-get install -q -y --fix-missing --no-install-recommends \
-        swi-prolog
+        swi-prolog gsoap
 
 COPY ext /interpret/ext
 
 WORKDIR /interpret/ext
-
-RUN cd candc/ext && \
-    tar -xjvf gsoap-2.8.16.tbz2 && \
-    cd gsoap-2.8 && \
-    ./configure --prefix=/interpret/ext/candc/ext && \
-    make && \
-    make install
 
 RUN cd candc && \
     make && \
@@ -69,7 +62,6 @@ RUN mkdir -p $GUROBI_INSTALL && \
     tar xvzf gurobi6.0.5_linux64.tar.gz && \
     mv gurobi605/linux64 $GUROBI_INSTALL && \
     mkdir $GUROBI_HOME/scripts && \
-    # Clean up.
     rm -rf $GUROBI_HOME/docs && \
     rm -rf $GUROBI_HOME/examples && \
     rm -rf $GUROBI_HOME/src && \
