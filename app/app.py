@@ -38,7 +38,10 @@ commands = {
     'boxer':
       ['/interpret/ext/candc/bin/boxer',
        '--stdin',
+       '--elimeq', 'true',
+       '--mwe', 'yes',
        '--semantics', 'tacitus',
+       '--plural', 'true',
        '--resolve', 'true',
        '--roles', 'verbnet'],
     'phillip-lpsolve':
