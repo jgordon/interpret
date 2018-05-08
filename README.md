@@ -29,3 +29,9 @@ particular request:
 ```
 ; ./client -s sentence.txt -k kb/custom.kb
 ```
+
+
+## Acknowledgments
+
+This work is supported by Contract W911NF-15-1-0543 with the US Defense
+Advanced Research Projects Agency (DARPA).
