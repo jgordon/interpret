@@ -234,7 +234,3 @@ def license():
                 shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
 
     return jsonify({'response': p.stdout.decode()})
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
