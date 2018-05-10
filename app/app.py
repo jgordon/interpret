@@ -52,6 +52,15 @@ commands = {
        '-c', 'lhs=depth',
        '-c', 'ilp=weighted',
        '-c', 'sol=lpsolve'],
+    'phillip-gurobi':
+      ['/interpret/ext/phillip/bin/phil',
+       '-m', 'infer',
+       '-k', '/interpret/kb/compiled',
+       '-H',
+       '-c', 'lhs=depth',
+       '-c', 'ilp=weighted',
+       '-c', 'sol=gurobi'
+      ],
     'phillip-gurobi-kbest':
       ['/interpret/ext/phillip/bin/phil',
        '-m', 'infer',
@@ -140,6 +149,8 @@ def interpret(data):
         kb = open('/interpret/kb/kb.lisp').read().encode()
 
     out, err = run_commands(['compile kb'], kb)
+    #if err:
+    #    return {'error': err}
 
     if 's' in data:
         sent = process_text(data['s'])
@@ -156,7 +167,8 @@ def interpret(data):
 
     cmd = 'phillip-lpsolve'
     if os.path.isfile('/interpret/ext/gurobi/license/gurobi.lic'):
-        cmd = 'phillip-gurobi-kbest'
+        #cmd = 'phillip-gurobi-kbest'
+        cmd = 'phillip-gurobi'
 
     data = parse.encode() + b'\n'
     out, err = run_commands([cmd], data)
