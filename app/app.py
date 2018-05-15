@@ -26,7 +26,7 @@ commands = {
     'compile kb':
       ['/interpret/ext/phillip/bin/phil',
        '-m', 'compile',
-       '-c', 'dist=cost',
+       '-c', 'dist=basic',
        '-c', 'tab=null',
        '-k' '/interpret/kb/compiled'],
     'tokenize':
@@ -149,7 +149,8 @@ def interpret(data):
         kb = open('/interpret/kb/kb.lisp').read().encode()
 
     out, err = run_commands(['compile kb'], kb)
-    #if err:
+    if err:
+        print(err, file=sys.stderr)
     #    return {'error': err}
 
     if 's' in data:
