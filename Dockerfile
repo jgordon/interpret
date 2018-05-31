@@ -55,7 +55,7 @@ ENV GUROBI_HOME $GUROBI_INSTALL/linux64
 ENV PATH $PATH:$GUROBI_HOME/bin
 ENV CPLUS_INCLUDE_PATH $GUROBI_HOME/include:$CPLUS_INCLUDE_PATH
 ENV LD_LIBRARY_PATH $GUROBI_HOME/lib:$LD_LIBRARY_PATH
-ENV GRB_LICENSE_FILE /interpret/ext/gurobi/license/gurobi.lic
+ENV GRB_LICENSE_FILE $GUROBI_INSTALL/license/gurobi.lic
 
 RUN mkdir -p $GUROBI_INSTALL && \
     wget http://packages.gurobi.com/6.0/gurobi6.0.5_linux64.tar.gz && \
