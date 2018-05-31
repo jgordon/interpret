@@ -16,8 +16,10 @@ port = '5000'
               help='File containing a parsed sentence.')
 @click.option('-k', type=click.Path(exists=True),
               help='File containing a knowledge base.')
+@click.option('-q', is_flag=True,
+              help='Quiet; do not print link for proof graph.')
 @click.argument('sent', nargs=-1, metavar='<sentence>')
-def main(l, s, p, k, sent):
+def main(l, s, p, k, q, sent):
     """Interpret a sentence or a parsed sentence. Sentences can be read
     from a file (-s) or passed as the argument <sentence>. Parses must be read
     from a file (-p)."""
@@ -48,7 +50,6 @@ def main(l, s, p, k, sent):
         query['p'] = open(p).read()
 
 
-
     r = requests.post('http://' + host + ':' + port + '/interpret', json=query)
     if not r:
         sys.stderr.write('Error receiving response from server.\n')
@@ -64,7 +65,7 @@ def main(l, s, p, k, sent):
         print('Interpret:')
         print(response['interpret'])
 
-    if 'graph' in response:
+    if 'graph' in response and not q:
         print()
         print('Proof graph URL:')
         print(response['graph'])
