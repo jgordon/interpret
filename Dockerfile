@@ -34,28 +34,31 @@ RUN conda install -y flask beautifulsoup4 lxml ftfy
 # Add the C&C pipeline and compile.
 
 RUN apt-get install -q -y --fix-missing --no-install-recommends \
-        swi-prolog gsoap
-
-COPY ext /interpret/ext
+        git gsoap swi-prolog
 
 WORKDIR /interpret/ext
 
-RUN cd candc && \
-    make && \
+RUN git clone https://github.com/jgordon/boxer candc
+
+WORKDIR /interpret/ext/candc
+
+# RUN git checkout develop
+
+RUN make && \
     make bin/t && \
     make bin/boxer && \
-    make soap && \
-    tar -xjvf models-1.02.tbz2
+    make soap
+
+RUN tar -xjvf models-1.02.tar.bz2 && \
+    rm models-1.02.tar.bz2
 
 
 # Install Gurobi.
 
 ENV GUROBI_INSTALL /interpret/ext/gurobi
 ENV GUROBI_HOME $GUROBI_INSTALL/linux64
-ENV PATH $PATH:$GUROBI_HOME/bin
-ENV CPLUS_INCLUDE_PATH $GUROBI_HOME/include:$CPLUS_INCLUDE_PATH
-ENV LD_LIBRARY_PATH $GUROBI_HOME/lib:$LD_LIBRARY_PATH
-ENV GRB_LICENSE_FILE /interpret/ext/gurobi/license/gurobi.lic
+
+WORKDIR /interpret/ext
 
 RUN mkdir -p $GUROBI_INSTALL && \
     wget http://packages.gurobi.com/6.0/gurobi6.0.5_linux64.tar.gz && \
@@ -68,6 +71,11 @@ RUN mkdir -p $GUROBI_INSTALL && \
     rm -rf gurobi605 && \
     rm -f gurobi6.0.5_linux64.tar.gz
 
+ENV PATH $PATH:$GUROBI_HOME/bin
+ENV CPLUS_INCLUDE_PATH $GUROBI_HOME/include:$CPLUS_INCLUDE_PATH
+ENV LD_LIBRARY_PATH $GUROBI_HOME/lib:$LD_LIBRARY_PATH
+ENV GRB_LICENSE_FILE $GUROBI_INSTALL/license/gurobi.lic
+
 
 # Install Phillip.
 
@@ -77,6 +85,8 @@ RUN apt-get install -q -y --fix-missing --no-install-recommends \
 ENV CPLUS_INCLUDE_PATH /usr/include/lpsolve:$CPLUS_INCLUDE_PATH
 ENV LD_LIBRARY_PATH /usr/lib/lp_solve:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH /usr/lib/lp_solve:$GUROBI_HOME/lib:$LIBRARY_PATH
+
+WORKDIR /interpret/ext
 
 RUN git clone https://github.com/kazeto/phillip.git && \
     cd phillip && \
