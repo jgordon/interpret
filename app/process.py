@@ -97,13 +97,13 @@ def process_boxer(lines, nonmerge=None):
             prop_name = re.sub(r'[\s_:./]+', '-', m.group(2))
 
             # Rename VerbNet roles.
-            if prop_name in [
-                    'Actor', 'Agent', 'Asset', 'Attribute', 'Beneficiary',
-                    'Cause', 'Destination', 'Experiencer', 'Extent',
-                    'Instrument', 'Location', 'Material', 'Patient',
-                    'Predicate', 'Product', 'Recipient', 'Stimulus', 'Source',
-                    'Theme', 'Time', 'Topic']:
-                prop_name = 'vn-' + prop_name.lower()
+            # if prop_name in [
+            #         'Actor', 'Agent', 'Asset', 'Attribute', 'Beneficiary',
+            #         'Cause', 'Destination', 'Experiencer', 'Extent',
+            #         'Instrument', 'Location', 'Material', 'Patient',
+            #         'Predicate', 'Product', 'Recipient', 'Stimulus', 'Source',
+            #         'Theme', 'Time', 'Topic']:
+            #     prop_name = 'vn-' + prop_name.lower()
 
             # Skip predicates that don't contain letters or numbers.
             if not re.search('[a-zA-Z0-9]', prop_name):

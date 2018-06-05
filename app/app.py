@@ -42,8 +42,8 @@ commands = {
        '--mwe', 'yes',
        '--semantics', 'tacitus',
        '--plural', 'true',
-       '--resolve', 'true',
-       '--roles', 'verbnet'],
+       '--resolve', 'true'],
+       # '--roles', 'verbnet'],
     'phillip-lpsolve':
       ['/interpret/ext/phillip/bin/phil',
        '-m', 'infer',
