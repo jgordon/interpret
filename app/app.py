@@ -10,6 +10,7 @@ import ftfy
 
 from flask import Flask, request, jsonify, send_file, send_from_directory, \
     render_template
+from ansi2html import Ansi2HTMLConverter
 
 from process import process_phillip, process_boxer
 
@@ -130,7 +131,7 @@ def interpret_html():
     except KeyError:
         print('Bad interpretation:', file=sys.stderr)
         print(interp, file=sys.stderr)
-        return 'error'
+        return error_html(interp.get('error', ''))
 
     return graph_html(graph_id)
 
@@ -148,10 +149,14 @@ def interpret(data):
     else:
         kb = open('/interpret/kb/kb.lisp').read().encode()
 
+    if str(kb).count('(') != str(kb).count(')'):
+        print('Mismatched parentheses in KB.', file=sys.stderr)
+        return {'error': 'Mismatched parentheses in KB.'}
+
     out, err = run_commands(['compile kb'], kb)
-    if err:
+    if 'error' in err:
         print(err, file=sys.stderr)
-    #    return {'error': err}
+        return {'error': err}
 
     if 's' in data:
         sent = process_text(data['s'])
@@ -162,6 +167,9 @@ def interpret(data):
 
         parse = process_boxer(out, nonmerge)
     elif 'p' in data:
+        if '(O ' not in data['p']:
+            print('Parse does not contain \'(O \'.', file=sys.stderr)
+            return {'error': 'Parse does not contain \'(O \'.'}
         parse = data['p']
     else:
         return {'error': 'No sentence or parse found.'}
@@ -173,9 +181,9 @@ def interpret(data):
 
     data = parse.encode() + b'\n'
     out, err = run_commands([cmd], data)
-    #if err:
-    #    # Phillip prints trivial messages to stderr.
-    #    sys.stderr.write('Running inference:\n%s\n' % err)
+    if 'error' in err:
+        print('Running inference:\n', err, file=sys.stderr)
+        return {'error': err}
 
     interpret = process_phillip(out)
 
@@ -247,3 +255,8 @@ def license():
                 shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
 
     return jsonify({'response': p.stdout.decode()})
+
+
+def error_html(err):
+    conv = Ansi2HTMLConverter(inline=True, scheme='mint-terminal')
+    return render_template('error.html', error=conv.convert(err, full=False))
