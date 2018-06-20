@@ -28,7 +28,7 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN conda update -y conda
 
-RUN conda install -y flask beautifulsoup4 lxml ftfy
+RUN conda install -y flask beautifulsoup4 lxml ftfy ansi2html
 
 
 # Add the C&C pipeline and compile.
