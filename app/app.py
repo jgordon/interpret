@@ -8,7 +8,7 @@ import subprocess as sub
 import json
 import ftfy
 
-from flask import Flask, request, jsonify, send_file, send_from_directory, \
+from flask import Flask, request, jsonify, send_from_directory, \
     render_template
 from ansi2html import Ansi2HTMLConverter
 
