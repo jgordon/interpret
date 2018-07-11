@@ -174,12 +174,12 @@ def process_boxer(lines, nonmerge=None):
                     pred2farg[pred4nm].append(first_arg)
 
         if 'sameid' in nonmerge:
-            for id, args in id2prop.items():
+            for _, args in id2prop.items():
                 if len(args) > 1:
                     out += ' (!= ' + ' '.join(args) + ')'
 
         if 'samename' in nonmerge:
-            for id, args in id2args.items():
+            for _, args in id2args.items():
                 if len(args) < 2:
                     continue
                 arity = all(len(x) == len(args[0]) for x in args)

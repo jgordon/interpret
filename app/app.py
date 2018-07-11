@@ -8,7 +8,8 @@ import subprocess as sub
 import json
 import ftfy
 
-from flask import Flask, request, jsonify, send_file, send_from_directory, \
+from contextlib import suppress
+from flask import Flask, request, jsonify, send_from_directory, \
     render_template
 from ansi2html import Ansi2HTMLConverter
 
@@ -246,10 +247,8 @@ def tmp(fname):
 def license():
     key = request.get_json(force=True)['license']
 
-    try:
+    with suppress(FileNotFoundError):
         os.remove('/interpret/ext/gurobi/license/gurobi.lic')
-    except:
-        pass
 
     p = sub.run(["echo '\n/interpret/ext/gurobi/license' | grbgetkey " + key],
                 shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
