@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo yes | grbgetkey $*
+
+mv /opt/gurobi/gurobi.lic /interpret/ext/gurobi/license/gurobi.lic

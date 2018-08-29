@@ -1,0 +1,6 @@
+#!/bin/bash
+
+docker run -it \
+       -v $PWD/license:/interpret/ext/gurobi/license \
+       --rm --name interp interp \
+       /interpret/store-license $1

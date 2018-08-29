@@ -101,6 +101,7 @@ RUN tar -xjvf models-1.02.tar.bz2 \
 COPY app /interpret/app
 COPY kb /interpret/kb
 COPY server /interpret
+COPY store-license /interpret
 
 
 # Run our server.
